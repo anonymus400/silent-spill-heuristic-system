@@ -69,7 +69,7 @@ def save_to_excel(new_urls):
         print(" No new unique URLs found. Skipping save.")
 
 
-# Run Every 3 Seconds (900 Runs)
+# Run Every 2 Seconds (900 Runs)
 run_count = 0
 total_runs = 900
 
@@ -83,6 +83,7 @@ while run_count < total_runs:
         print(" No new URLs found.")
 
     run_count += 1
-    time.sleep(20)  # Wait 3 seconds before next run
+    time.sleep(2)  # Wait 2 seconds before next run
 
 print(f"\n Script finished after {run_count} runs.")
+

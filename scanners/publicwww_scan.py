@@ -107,7 +107,7 @@ def fetch_page(pattern, frm, to, offset):
 
 def main():
     patterns = load_patterns()
-    # 4-year slices; adjust if needed
+    
     windows = year_windows(start=1996, span_years=4)
     state = load_state(patterns, windows)
     buffer = []
@@ -175,3 +175,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

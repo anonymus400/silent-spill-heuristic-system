@@ -31,7 +31,7 @@ DOMAINS = [
     "pastie.io", "pastebucket.com", "bpaste.net", "notes.io"
 ]
 
-DB_PATH = "results.db"
+DB_PATH = "....db"
 
 
 # HTTP session with retries
@@ -106,7 +106,7 @@ def collect_wayback_urls(domain, limit=50000):
 
         filtered_urls.append(original_url)
 
-    time.sleep(1)
+    time.sleep(2)
     return list(set(filtered_urls))
 
 

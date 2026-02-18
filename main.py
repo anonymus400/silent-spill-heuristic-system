@@ -1,5 +1,3 @@
-
-
 import concurrent.futures
 import io
 import json
@@ -54,13 +52,13 @@ stats["paste_live"] = 0
 stats["non_english"] = 0
 
 
-SCREENSHOT_FOLDER = ""
-HTML_FOLDER = ""
-OCR_SCREENSHOT_FOLDER = ""
-OCR_HTML_FOLDER = ""
+SCREENSHOT_FOLDER = "..."
+HTML_FOLDER = "..."
+OCR_SCREENSHOT_FOLDER = "..."
+OCR_HTML_FOLDER = "..."
 PDF_FOLDER = os.path.join(os.getcwd(), "pdf_downloads")
 
-RESULTS_DB = ""
+RESULTS_DB = "..."
 NUM_THREADS = 10
 url_queue = Queue()
 live_urls = 0
@@ -80,13 +78,9 @@ INCLUSIVE_CONFIG = {
     "min_val_length": 16,
     "require_digit": True,
     "require_field_match": True,
-    "allow_common_emails": True,
-    "accept_placeholders": False,
-    "allow_weak_fields": False,
-    "match_soft_keywords": False,
     "min_html_length": 100,
     "min_structural_tags": 3,
-    "allow_login_pages": True,
+    "allow_login_pages": False,
     "ocr_on_failure_only": True,
     "enable_translation": True,
     "max_translate_chars": 2000,
@@ -112,7 +106,6 @@ SUSPICIOUS_URL_PARAMS_SET = {
     "recovery_token", "reset_token", "oauth_token", "oauth_verifier", "bearer", "state_token",
     "security_login", "client_token", "sso_token", "authenticity_token",
     "csrftoken", "logincsrfparam", "requestverificationtoken", "security_token", "reservas", "csrf-token",
-
 
     "webhook_url", "webhook_token", "slack_webhook", "slack_token", "slack_bot_token",
     "discord_invite", "discord_bot_token", "telegram_bot_token", "telegram_chat_id",
@@ -173,6 +166,7 @@ SUSPICIOUS_URL_PARAMS_SET = {
     "identity", "key", "certificate", "ssh_key", "oauth",
     "profile", "account", "settings", "media", "media_id", "photo",
     "image", "img_url", "video_url", "link"}
+
 SUSPICIOUS_PARAMS_SET = {
 
     "envelope_id", "signing_token", "sessionid", "session_id", "session_key", "sign_token", "doc_hash",
@@ -183,10 +177,8 @@ SUSPICIOUS_PARAMS_SET = {
     "private_key", "private_key", "hmac", "security_code", "verification_code", "recovery_token", "reset_token", "oauth_token", "oauth_verifier", "crypto_wallet",
     "jwt", "bearer", "state_token", "token", "security-login", "client_token", "sso_token", "authenticity_token", "csrftoken", "logincsrfparam", "requestverificationtoken", "security_token",
 
-
     "national_id", "social_security_number", "driver_license_number",
     "tax_id", "pan_number", "pan_card", "identity_number", "ssn_last4", "health_id", "voter_id", "employee_id",
-
 
     "cart_id", "order_number", "invoice_number", "purchase_id", "transaction id", "transaction_token", "checkout_token",
     "order_reference", "payment_ref", "payment_token", "payment_id", "payment_method", "debitcard",
@@ -220,13 +212,9 @@ SUSPICIOUS_PARAMS_SET = {
     "WhatsApp Link", "Group ID", "Profile ID",
     "Wallet Address", "Crypto Token", "Transaction Hash", "Mnemonic", "Seed Phrase",
     "Download Link", "Document ID", "GDrive Link", "Dropbox Link",
-
-
-
 }
 
 E_SIGNATURE_DOMAINS = [
-
     "esignlive.com", "sandbox.esignlive.com", "docusign.net", "docusign.com", "secure.adobesign.com",
     "adobesign.com", "hellosign.com", "onespan.com", "signnow.com", "pandadoc.com", "dropboxsign.com",
     "rightsignature.com", "zohosign.com", "signrequest.com", "eversign.com", "assuresign.com",
@@ -266,7 +254,6 @@ PASTE_DOMAINS = [d.lower() for d in globals().get("PASTE_DOMAINS", [])]
 E_SIGNATURE_DOMAINS = [d.lower()
                        for d in globals().get("E_SIGNATURE_DOMAINS", [])]
 
-
 SUSPICIOUS_URL_PARAMS_SET = {
     re.sub(r'[^a-z0-9]+', '_', s.lower()).strip('_') for s in SUSPICIOUS_URL_PARAMS_SET
 }
@@ -274,10 +261,8 @@ SUSPICIOUS_PARAMS_SET = {
     re.sub(r'[^a-z0-9]+', '_', s.lower()).strip('_') for s in SUSPICIOUS_PARAMS_SET
 }
 
-
 def norm_key(
     s: str) -> str: return re.sub(r'[^a-z0-9]+', '_', (s or '').lower()).strip('_')
-
 
 COMMON_JUNK = {
     "yes", "true", "ok", "none", "email", "submit", "click", "value", "button", "form",
@@ -315,7 +300,6 @@ chrome_options.add_argument("--disable-sync")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-first-run")
 chrome_options.add_argument("--disable-background-timer-throttling")
-# tighten Chrome child procs
 chrome_options.add_argument("--renderer-process-limit=1")
 
 
@@ -326,23 +310,25 @@ def init_results_db():
 
     conn = sqlite3.connect(RESULTS_DB)
     c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS leaks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            url TEXT,
-            status TEXT,
-            matched_url TEXT,
-            matched_html TEXT,
-            screenshot_path TEXT,
-            html_path TEXT
 
-        )
-    """)
+    c.execute(
+        "CREATE TABLE IF NOT EXISTS leaks ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "url TEXT, "
+        "status TEXT, "
+        "matched_url TEXT, "
+        "matched_html TEXT, "
+        "screenshot_path TEXT, "
+        "html_path TEXT"
+        ")"
+    )
+
     conn.commit()
     conn.close()
 
 
-folder = ""
+
+folder = "..."
 
 
 all_urls = []
@@ -377,7 +363,6 @@ def check_special_domain(url):
             return "paste"
     return None
 
-
 def filter_useful_urls(url_list):
     global screenshot_counter
 
@@ -386,13 +371,11 @@ def filter_useful_urls(url_list):
         "static_file": 0,
         "no_signal": 0
     }
-
     bad_exts = {
         ".gif", ".css", ".svg", ".woff", ".ico", ".mp4", ".webp",
         ".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".heic", ".webm",
         ".zip", ".tar", ".gz", ".7z", ".rar"
     }
-
     for url in url_list:
         try:
             parsed = urllib.parse.urlparse(url)
@@ -516,7 +499,7 @@ def is_high_signal_heuristic(url, query_params):
 
 
 def decode_pdf_file(pdf_path, dpi=200, max_pages=None):
-    """Render PDF pages and decode barcodes. Returns list with page index."""
+    #Render PDF pages and decode barcodes. Returns list with page index.
     results = []
     try:
         doc = fitz.open(pdf_path)
@@ -587,16 +570,12 @@ def extract_dynamic_inputs(driver, suspicious_keywords, config):
                     "field": name,
                     "source": "input_dynamic"
                 })
-
                 print(
                     f"Extracted dynamic input: type={matched_type or 'input_value'}, field={name}, value={value.strip()}")
-
         except Exception as e:
             print(f" Error in dynamic input extraction: {e}")
             continue
-
     return leaks
-
 
 def is_url_live(url):
     try:
@@ -647,7 +626,6 @@ def take_screenshot(url, prefix="test", screenshot_dir=None, html_dir=None):
         screenshot_dir = SCREENSHOT_FOLDER
     if html_dir is None:
         html_dir = HTML_FOLDER
-
     try:
         os.makedirs(screenshot_dir, exist_ok=True)
         os.makedirs(html_dir, exist_ok=True)
@@ -699,8 +677,7 @@ def take_screenshot(url, prefix="test", screenshot_dir=None, html_dir=None):
             except Exception:
                 pass
         time.sleep(0.1)
-
-
+        
 def safe_screenshot_with_timeout(url, prefix="test", timeout=30):
     def _take():
         return take_screenshot(url, prefix=prefix)
@@ -718,7 +695,6 @@ def safe_screenshot_with_timeout(url, prefix="test", timeout=30):
             f" Screenshot thread crashed for {url}: {type(e).__name__}: {e}")
         return None, None
 
-
 def translate_safe(text, target="en", retries=1, delay=0.3):
     if not text:
         return text
@@ -733,7 +709,6 @@ def translate_safe(text, target="en", retries=1, delay=0.3):
             except Exception:
                 return text
         return text
-
 
 def extract_from_visible_text(text, suspicious_keywords, config):
     leaks = []
@@ -781,11 +756,8 @@ def extract_from_visible_text(text, suspicious_keywords, config):
                         "value": val,
                         "source": "visible_text"
                     })
-
                 break
-
     return leaks
-
 
 URL_RE = re.compile(r'^https?://', re.I)
 EXT_RE = re.compile(
@@ -793,9 +765,7 @@ EXT_RE = re.compile(
 PATH_RE = re.compile(r'^(/[A-Za-z0-9._%~-]+){2,}$')
 UUID_RE = re.compile(
     r'\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b', re.I)
-# 24/32/40/64+ hex
 HEX_RE = re.compile(r'\b[0-9a-f]{24,}\b', re.I)
-# URL-safe base64
 B64_RE = re.compile(r'^[A-Za-z0-9+/_-]{32,}={0,2}$')
 JWT_RE = re.compile(
     r'^[A-Za-z0-9-_]{20,}\.[A-Za-z0-9-_]{20,}\.[A-Za-z0-9-_]{20,}$')
@@ -804,7 +774,6 @@ DENY_FIELDS = {
     'shareurl', 'returnurl', 'redirect', 'return_url', 'url', 'href', 'lang', 'locale', 'sort', 'page',
     'search', 'query', 'filter', 'q', 's', 'ref', 'referrer', 'source', 'utm', 'gclid', 'fbclid', 'input'
 }
-
 
 def is_denied_field(name: str) -> bool:
     if not name:
@@ -818,7 +787,6 @@ def is_denied_field(name: str) -> bool:
             return True
     return False
 
-
 def shannon_bpc(s: str) -> float:
     from math import log2
     if not s:
@@ -828,8 +796,7 @@ def shannon_bpc(s: str) -> float:
     for c in s:
         freq[c] = freq.get(c, 0) + 1
     H = -sum((n/L) * log2(n/L) for n in freq.values())
-    return H  # absolute bits/char; threshold tuned below
-
+    return H  
 
 def looks_secretish(v: str, min_len: int = 16) -> bool:
     v = (v or '').strip()
@@ -959,9 +926,7 @@ def extract_from_inputs(soup, suspicious_keywords, config):
                 "field": name,
                 "source": "input"
             })
-
     return leaks
-
 
 def extract_from_meta_and_data_attrs(soup, suspicious_keywords, config):
     leaks = []
@@ -1074,30 +1039,7 @@ def _safe_json_loads(s):
     except Exception:
         return None
 
-
-def capture_network_traffic(driver, max_entries=1500):
-    """Pull DevTools performance logs and extract Network.* events."""
-    events = []
-    try:
-        raw = driver.get_log("performance")
-    except Exception:
-        return events
-
-    for item in raw[-max_entries:]:
-        msg = _safe_json_loads(item.get("message", ""))
-        if not msg:
-            continue
-        m = msg.get("message", {})
-        method = m.get("method", "")
-        if not method.startswith("Network."):
-            continue
-        params = m.get("params", {})
-        events.append({"method": method, "params": params})
-    return events
-
-
 def normalize_request_index(events):
-    """Index requests by requestId and join request/response basics."""
     reqs = {}
     for ev in events:
         m = ev["method"]
@@ -1125,62 +1067,8 @@ def normalize_request_index(events):
                 "resp_headers": resp.get("headers", {}),
                 "mime": resp.get("mimeType"),
             })
-    # flatten
+    
     return [v for v in reqs.values() if v.get("url")]
-
-
-def extract_secrets_from_requests(req_list, suspicious_keys, config):
-    """Look in request URLs, headers, and bodies for leaks."""
-    leaks = []
-
-    for r in req_list:
-        url = r.get("url") or ""
-        method = (r.get("method") or "").upper()
-        headers = r.get("headers") or {}
-        postData = r.get("postData") or ""
-        status = r.get("status")
-
-        # 1) URL query params
-        try:
-            u = urlsplit(url)
-            q = dict(parse_qsl(u.query))
-            for k, v in q.items():
-                k_norm = re.sub(r'[^a-z0-9]+', '_',
-                                (k or "").lower()).strip('_')
-                if k_norm in suspicious_keys and is_valid_leak_value(v, config):
-                    leaks.append({"type": f"HTTP-layer:{k_norm}",
-                                 "value": v, "source": f"http_{method}"})
-        except Exception:
-            pass
-
-        # 3) POST body (JSON or form-encoded if present in log)
-        if isinstance(postData, str) and len(postData) >= config.get("min_val_length", 16):
-            # Try JSON first
-            parsed = _safe_json_loads(postData)
-            if isinstance(parsed, dict):
-                for k, v in parsed.items():
-                    if not isinstance(v, str):
-                        continue
-                    k_norm = re.sub(r'[^a-z0-9]+', '_',
-                                    (k or "").lower()).strip('_')
-                    if k_norm in suspicious_keys and is_valid_leak_value(v, config):
-                        leaks.append({"type": f"req_body:{k_norm}",
-                                     "value": v, "source": f"http_{method}"})
-            else:
-                # Fallback: form-encoded k=v&… (best-effort)
-                try:
-                    pairs = dict(parse_qsl(postData))
-                    for k, v in pairs.items():
-                        k_norm = re.sub(r'[^a-z0-9]+', '_',
-                                        (k or "").lower()).strip('_')
-                        if k_norm in suspicious_keys and is_valid_leak_value(v, config):
-                            leaks.append(
-                                {"type": f"req_body:{k_norm}", "value": v, "source": f"http_{method}"})
-                except Exception:
-                    pass
-
-    return deduplicate_leaks(leaks)
-
 
 def process_ocr_leaks(url, prefix, leak_type="ocr"):
     ss_path, html_path, _ = take_screenshot(
@@ -1235,31 +1123,69 @@ def process_ocr_leaks(url, prefix, leak_type="ocr"):
             os.remove(html_path)
         except Exception as e:
             print(f" Cleanup error: {e}")
-
-
-def save_http_requests(page_url, req_list):
+            
+def save_result_to_db(res):
     try:
         conn = sqlite3.connect(RESULTS_DB)
         c = conn.cursor()
-        for r in req_list:
-            c.execute("""
-                INSERT INTO http_requests (page_url, req_url, method, status, req_headers, post_data, mime, ts)
-                VALUES (?,?,?,?,?,?,?,?)
-            """, (
-                page_url,
-                r.get("url"),
-                r.get("method"),
-                r.get("status"),
-                json.dumps(r.get("headers") or {}, ensure_ascii=False),
-                (r.get("postData") or "")[:5000],
-                r.get("mime"),
-                r.get("ts"),
-            ))
+
+        c.execute(
+            "INSERT INTO leaks (url, status, matched_url, matched_html, screenshot_path, html_path) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                res["url"],
+                res["status"],
+                res["matched_url"],
+                res["matched_html"],
+                res["screenshot_path"],
+                res["html_path"],
+            )
+        )
+
         conn.commit()
         conn.close()
-    except Exception as e:
-        print(f" DB save http_requests failed: {e}")
+        print(f"Saved to DB: {res['url']}")
 
+    except Exception as e:
+        print(f"DB insert failed for {res['url']}: {e}")
+
+
+def format_leaks(leak_list, max_len=200):
+    def _clean(v):
+        v = (v or "").replace("\n", " ").replace("\r", " ").strip()
+        return (v[:max_len] + "…") if len(v) > max_len else v
+    types = "; ".join(_clean(l["type"]) for l in leak_list)
+    values = "; ".join(_clean(l["value"]) for l in leak_list)
+    pairs = "; ".join(
+        f"{_clean(l['type'])}:{_clean(l['value'])}" for l in leak_list)
+    return types, values, pairs
+
+
+def etld1(host):
+    parts = (host or "").lower().split(".")
+    return ".".join(parts[-2:]) if len(parts) >= 2 else host.lower()
+
+
+LEAK_PATTERNS = {
+    "email": re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I),
+    "credit_card": re.compile(r"\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b"),
+    "phone": re.compile(r"\b(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}\b"),
+    "id_like": re.compile(r"\b\d{9,}\b"),
+    "api_secret": re.compile(r"\b(?:api[_-]?key|secret|password|pwd|token|bearer)\b[:=]?[ \t]*[A-Za-z0-9._\-]{8,}", re.I),
+    "jwt": JWT_RE,
+    "base64": B64_RE,
+}
+
+
+def worker_single_url(entry):
+    try:
+        url = entry["url"]
+        matched_url = entry.get("matched_url", "")
+        url_queue.put(entry)     # enqueue the single URL
+        url_queue.put(None)      # enqueue sentinel so worker stops
+        worker()                 # run worker loop once
+    except Exception as e:
+        print(f"worker_single_url error for {entry.get('url')}: {e}")
 
 def worker():
     while True:
@@ -1293,14 +1219,14 @@ def worker():
                     "url": url,
                     "status": "Live",
                     "matched_url": f"{domain_type} domain matched",
-                    "matched_html": "",            # no leak parsing here
+                    "matched_html": "",         
                     "screenshot_path": ss_path or "N/A",
                     "html_path": html_path or "N/A",
                     "type": domain_type
                 })
                 with stats_lock:
                     stats[f"{domain_type}_live"] += 1
-                continue  # task_done is handled in finally
+                continue 
 
             with stats_lock:
                 stats["processed"] += 1
@@ -1311,7 +1237,7 @@ def worker():
                     logf.write(url + "\n")
             except Exception as e:
                 print(f" Failed to write log: {e}")
-# --- PDFs: just screenshot + HTML, then save (no parsing) ---
+            # --- PDFs: just screenshot + HTML, then save (no parsing) ---
             if url.lower().endswith(".pdf"):
                 try:
                     print("Detected PDF URL — capture SS + HTML only.")
@@ -1347,7 +1273,7 @@ def worker():
                         print(f"PDF SS/HTML capture failed: {e}")
                         ss_path, html_path = "N/A", "N/A"
 
-                    # 4) Always log the capture row
+                    # 3) Always log the capture row
                     save_result_to_db({
                         "url": url,
                         "status": "Live",
@@ -1379,7 +1305,7 @@ def worker():
 
             # === Render page with Selenium ===
             driver = None
-            leaks_dynamic_inputs = []  # always initialize to avoid undefined errors
+            leaks_dynamic_inputs = [] 
 
             try:
                 driver = webdriver.Chrome(
@@ -1530,68 +1456,6 @@ def worker():
                     url_queue.task_done()
                 except Exception:
                     pass
-
-
-def save_result_to_db(res):
-    try:
-        conn = sqlite3.connect(RESULTS_DB)
-        c = conn.cursor()
-        c.execute("""
-            INSERT INTO leaks (url, status, matched_url, matched_html, screenshot_path, html_path)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            res["url"],
-            res["status"],
-            res["matched_url"],
-            res["matched_html"],
-            res["screenshot_path"],
-            res["html_path"],
-        ))
-        conn.commit()
-        conn.close()
-        print(f" Saved to DB: {res['url']}")
-    except Exception as e:
-        print(f" DB insert failed for {res['url']}: {e}")
-
-
-def format_leaks(leak_list, max_len=200):
-    """Return (types_str, values_str, combined_str) from leak list (truncated + cleaned)."""
-    def _clean(v):
-        v = (v or "").replace("\n", " ").replace("\r", " ").strip()
-        return (v[:max_len] + "…") if len(v) > max_len else v
-    types = "; ".join(_clean(l["type"]) for l in leak_list)
-    values = "; ".join(_clean(l["value"]) for l in leak_list)
-    pairs = "; ".join(
-        f"{_clean(l['type'])}:{_clean(l['value'])}" for l in leak_list)
-    return types, values, pairs
-
-
-def etld1(host):
-    parts = (host or "").lower().split(".")
-    return ".".join(parts[-2:]) if len(parts) >= 2 else host.lower()
-
-
-# after JWT_RE and B64_RE are defined
-LEAK_PATTERNS = {
-    "email": re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I),
-    "credit_card": re.compile(r"\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b"),
-    "phone": re.compile(r"\b(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}\b"),
-    "id_like": re.compile(r"\b\d{9,}\b"),
-    "api_secret": re.compile(r"\b(?:api[_-]?key|secret|password|pwd|token|bearer)\b[:=]?[ \t]*[A-Za-z0-9._\-]{8,}", re.I),
-    "jwt": JWT_RE,
-    "base64": B64_RE,
-}
-
-
-def worker_single_url(entry):
-    try:
-        url = entry["url"]
-        matched_url = entry.get("matched_url", "")
-        url_queue.put(entry)     # enqueue the single URL
-        url_queue.put(None)      # enqueue sentinel so worker stops
-        worker()                 # run worker loop once
-    except Exception as e:
-        print(f"worker_single_url error for {entry.get('url')}: {e}")
 
 
 def main():

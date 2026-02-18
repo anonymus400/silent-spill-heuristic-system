@@ -6,8 +6,8 @@ import time
 import os
 
 
-# High-traffic domains to scan for URLs
-# put more domains
+# Domains to scan for URLs
+
 DOMAINS = [
 
     "paypal.com", "stripe.com", "squareup.com", "checkout.stripe.com",
@@ -74,8 +74,8 @@ DOMAINS = [
 ]
 
 
-API_KEY = ""
-EXCEL_FILE = "xlsx"
+API_KEY = "..."
+EXCEL_FILE = "....xlsx"
 
 
 # VirusTotal v2 endpoint
@@ -141,3 +141,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -57,7 +57,7 @@ def save_to_excel(new_urls):
     print(f" Total URLs in Excel: {len(df)}\n")  # Debugging
 
 
-#  Run the Script Every 3 Seconds (Stops After 10 Runs)
+#  Run the Script Every 2 Seconds (Stops After 10 Runs)
 run_count = 0
 total_runs = 900  # Modify this to change the number of runs
 
@@ -71,6 +71,7 @@ while run_count < total_runs:
         print(" No new URLs found.")
 
     run_count += 1
-    time.sleep(3)  # Wait 3 seconds before next run
+    time.sleep(2)  # Wait 2 seconds before next run
 
 print(f"\n Script finished after {run_count} runs.")
+
